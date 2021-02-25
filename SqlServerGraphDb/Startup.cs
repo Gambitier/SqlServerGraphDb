@@ -1,10 +1,13 @@
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SqlServerGraphDb.ExtensionMethods;
 using SqlServerGraphDb.Persistence.Factory;
+using System.Reflection;
 
 namespace SqlServerGraphDb
 {
@@ -22,6 +25,8 @@ namespace SqlServerGraphDb
         {
             services.AddSingleton(typeof(IConfiguration), Configuration);
             services.AddSingleton(typeof(IConnectionFactory), typeof(ConnectionFactory));
+            services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddDependencyInjection();
             services.AddControllers().AddJsonOptions(option =>
             {
                 option.JsonSerializerOptions.PropertyNamingPolicy = null;

@@ -8,7 +8,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServerGraphDb", "SqlServ
 		{781C0A80-BDF4-4301-B08E-B706037B5516} = {781C0A80-BDF4-4301-B08E-B706037B5516}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerGraphDb.Persistence", "SqlServerGraphDb.Persistence\SqlServerGraphDb.Persistence.csproj", "{781C0A80-BDF4-4301-B08E-B706037B5516}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServerGraphDb.Persistence", "SqlServerGraphDb.Persistence\SqlServerGraphDb.Persistence.csproj", "{781C0A80-BDF4-4301-B08E-B706037B5516}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerGraphDb.CommandQueryHandler", "SqlServerGraphDb.CommandQueryHandler\SqlServerGraphDb.CommandQueryHandler.csproj", "{14B0F0E8-1CEC-4338-B156-F2D67B9F416C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +26,10 @@ Global
 		{781C0A80-BDF4-4301-B08E-B706037B5516}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{781C0A80-BDF4-4301-B08E-B706037B5516}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{781C0A80-BDF4-4301-B08E-B706037B5516}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14B0F0E8-1CEC-4338-B156-F2D67B9F416C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14B0F0E8-1CEC-4338-B156-F2D67B9F416C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14B0F0E8-1CEC-4338-B156-F2D67B9F416C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14B0F0E8-1CEC-4338-B156-F2D67B9F416C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

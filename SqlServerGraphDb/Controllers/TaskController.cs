@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using SqlServerGraphDb.CommandQueryHandler.RequestModels.CommandRequestModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SqlServerGraphDb.Controllers
@@ -10,6 +10,13 @@ namespace SqlServerGraphDb.Controllers
     [Route("[controller]")]
     public class TaskController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public TaskController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
         enum ExecutionStatus
         {
             Success = 1, //processed all files and data inserted to db successfully
@@ -17,15 +24,15 @@ namespace SqlServerGraphDb.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateNewTask(string taskName)
+        public async Task<ActionResult> CreateNewTaskAsync(CreateTaskRequestModel requestModel)
         {
             // create new db entry, with taskName and current timeStamp
             // on successful entry, return id of db entry
             //------------------------Task Table----------------------------------
             // Id | taskName | createdOn | ExecutionStatus | ExecutionDescription |
             //---------------------------------------------------------------------
-
-            throw new NotImplementedException();
+            var response = await _mediator.Send(requestModel).ConfigureAwait(false);
+            return Ok(response);
         }
 
         enum FileType
