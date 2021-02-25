@@ -2,6 +2,6 @@
 {
     class StoredProcedureConstants
     {
-        public const string GetAllTasks = "spGetAllTasks";
+        public const string spTask_CreateTaskByName = "spTask_CreateTaskByName";
     }
 }

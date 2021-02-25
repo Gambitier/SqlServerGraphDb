@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SqlServerGraphDb.CommandQueryHandler.RequestModels.CommandRequestModels;
 using SqlServerGraphDb.CommandQueryHandler.ResponseModels.CommandResponseModels;
+using SqlServerGraphDb.Persistence.Persistence;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +10,17 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
 {
     public class CreateTaskCommandHandler : IRequestHandler<CreateTaskRequestModel, CreateTaskResponseModel>
     {
-        public Task<CreateTaskResponseModel> Handle(CreateTaskRequestModel request, CancellationToken cancellationToken)
+        private readonly ITaskPersistence _taskPersistence;
+
+        public CreateTaskCommandHandler(ITaskPersistence taskPersistence)
         {
-            throw new NotImplementedException();
+            _taskPersistence = taskPersistence;
+        }
+
+        public async Task<CreateTaskResponseModel> Handle(CreateTaskRequestModel request, CancellationToken cancellationToken)
+        {
+            var taskId = await _taskPersistence.CreateTaskByName(request.TaskName);
+            return new CreateTaskResponseModel { TaskId = taskId };
         }
     }
 }

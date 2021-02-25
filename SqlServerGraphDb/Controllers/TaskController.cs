@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace SqlServerGraphDb.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     public class TaskController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -24,7 +24,7 @@ namespace SqlServerGraphDb.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateNewTaskAsync(CreateTaskRequestModel requestModel)
+        public async Task<ActionResult> CreateNewTaskAsync([FromBody]CreateTaskRequestModel requestModel)
         {
             // create new db entry, with taskName and current timeStamp
             // on successful entry, return id of db entry
@@ -57,7 +57,7 @@ namespace SqlServerGraphDb.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllTaskDetails(string taskId)
+        public IActionResult GetAllTaskDetails([FromQuery]string taskId)
         {
             // return data from TaskAndFiles table
             // group data with Task.Id
@@ -65,7 +65,7 @@ namespace SqlServerGraphDb.Controllers
         }
 
         [HttpPost]
-        public IActionResult ExecuteTask(string taskId)
+        public IActionResult ExecuteTask([FromQuery]string taskId)
         {
             // Responsible for 
             // - reading all files uploaded for task

@@ -25,7 +25,7 @@ namespace SqlServerGraphDb
         {
             services.AddSingleton(typeof(IConfiguration), Configuration);
             services.AddSingleton(typeof(IConnectionFactory), typeof(ConnectionFactory));
-            services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddMediatR(Assembly.Load("SqlServerGraphDb.CommandQueryHandler"));
             services.AddDependencyInjection();
             services.AddControllers().AddJsonOptions(option =>
             {
