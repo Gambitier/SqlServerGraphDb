@@ -35,9 +35,9 @@ namespace SqlServerGraphDb.Controllers
         {
             // upload files and store information for
             // processing them later
-            //--------TaskDataFile Table---------------------
-            // Id | Task.Id | FileTypeEnum | FilePath |
-            //-----------------------------------------
+            //---------------TaskDataFile Table-------------------------------
+            // Id | Task.Id | FileTypeEnum | FilePath | FileProcessingStatus |
+            //----------------------------------------------------------------
             var response = await _mediator.Send(requestModel).ConfigureAwait(false);
             return Ok(response);
         }

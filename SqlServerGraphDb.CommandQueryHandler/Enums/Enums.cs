@@ -11,10 +11,12 @@ namespace SqlServerGraphDb.CommandQueryHandler.Enums
             Relation = 4
         }
 
-        public enum ExecutionStatus
+        public enum FileProcessingStatus
         {
-            Success = 1, //processed all files and data inserted to db successfully
-            Failed = 2, //Some error occured, =fileMissing, =invalidFileFormat-filetype
+            Uploaded = 1, // still can modify the file
+            Failed = 2, // so user need to modify file to correct file
+            Success = 3, //once file processing is success, dont let user upload another file
+            Inprogress = 4, //no modification allowed
         }
     }
 }
