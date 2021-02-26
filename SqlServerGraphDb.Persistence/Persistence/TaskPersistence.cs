@@ -22,8 +22,8 @@ namespace SqlServerGraphDb.Persistence.Persistence
         {
             var connection = _connectionFactory.GetDatabaseConnection();
             string query = StoredProcedureConstants.spTask_CreateTaskByName;
-            var result = await connection.ExecuteAsync(query, new { Name = TaskName }, null, null, CommandType.StoredProcedure);
-            return result;
+            int id = await connection.ExecuteScalarAsync<int>(query, new { Name = TaskName }, null, null, CommandType.StoredProcedure);
+            return id;
         }
     }
 }
