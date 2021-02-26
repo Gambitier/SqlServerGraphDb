@@ -15,4 +15,8 @@
     <ProjectReference Include="..\SqlServerGraphDb.CommandQueryHandler\SqlServerGraphDb.CommandQueryHandler.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TaskUploads\" />
+  </ItemGroup>
+
 </Project>

@@ -17,14 +17,8 @@ namespace SqlServerGraphDb.Controllers
             _mediator = mediator;
         }
 
-        enum ExecutionStatus
-        {
-            Success = 1, //processed all files and data inserted to db successfully
-            Failed = 2, //Some error occured, =fileMissing, =invalidFileFormat-filetype
-        }
-
         [HttpPost]
-        public async Task<ActionResult> CreateNewTaskAsync([FromBody]CreateTaskRequestModel requestModel)
+        public async Task<ActionResult> CreateNewTaskAsync([FromBody] CreateTaskRequestModel requestModel)
         {
             // create new db entry, with taskName and current timeStamp
             // on successful entry, return id of db entry
@@ -35,29 +29,21 @@ namespace SqlServerGraphDb.Controllers
             return Ok(response);
         }
 
-        enum FileType
-        {
-            Job = 1,
-            Operation = 2,
-            Project = 3,
-            Relation = 4
-        }
-
         [HttpPost]
-        public IActionResult UploadDataFile(string file, int fileType)
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+        public async Task<IActionResult> UploadDataFileAsync([FromForm] UploadFileRequestModel requestModel)
         {
             // upload files and store information for
             // processing them later
-            //--------TaskAndFile Table---------------------
+            //--------TaskDataFile Table---------------------
             // Id | Task.Id | FileTypeEnum | FilePath |
             //-----------------------------------------
-
-            FileType fileTypeEnum = (FileType)fileType;
-            throw new NotImplementedException();
+            var response = await _mediator.Send(requestModel).ConfigureAwait(false);
+            return Ok(response);
         }
 
         [HttpGet]
-        public IActionResult GetAllTaskDetails([FromQuery]string taskId)
+        public IActionResult GetAllTaskDetails([FromQuery] string taskId)
         {
             // return data from TaskAndFiles table
             // group data with Task.Id
@@ -65,7 +51,7 @@ namespace SqlServerGraphDb.Controllers
         }
 
         [HttpPost]
-        public IActionResult ExecuteTask([FromQuery]string taskId)
+        public IActionResult ExecuteTask([FromQuery] string taskId)
         {
             // Responsible for 
             // - reading all files uploaded for task
