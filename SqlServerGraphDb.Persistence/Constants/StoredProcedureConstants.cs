@@ -2,6 +2,7 @@
 {
     class StoredProcedureConstants
     {
-        public const string spTask_CreateTaskByName = "spTask_CreateTaskByName";
+        internal static string spTask_CreateTaskByName = "spTask_CreateTaskByName";
+        internal static string spTaskMetada_Create = "spTaskMetada_Create";
     }
 }

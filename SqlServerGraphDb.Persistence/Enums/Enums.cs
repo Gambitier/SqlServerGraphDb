@@ -1,5 +1,5 @@
 ﻿
-namespace SqlServerGraphDb.CommandQueryHandler.Enums
+namespace SqlServerGraphDb.Persistence.Enums
 {
     public class Enums
     {

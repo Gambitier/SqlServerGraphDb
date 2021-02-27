@@ -12,16 +12,16 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
 {
     public class UploadTaskFileCommandHandler : IRequestHandler<UploadFileRequestModel, UploadFileResponseModel>
     {
-        private readonly ITaskPersistence _taskPersistence;
+        private readonly ITaskMetadataPersistence _taskMetadataPersistence;
         private readonly IWebHostEnvironment _hostingEnvironment;
         IConfiguration _configuration;
 
         public UploadTaskFileCommandHandler(
-            ITaskPersistence taskPersistence,
+            ITaskMetadataPersistence taskMetadataPersistence,
             IWebHostEnvironment hostingEnvironment,
             IConfiguration configuration)
         {
-            _taskPersistence = taskPersistence;
+            _taskMetadataPersistence = taskMetadataPersistence;
             _hostingEnvironment = hostingEnvironment;
             _configuration = configuration;
         }
@@ -29,7 +29,7 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
         public async Task<UploadFileResponseModel> Handle(UploadFileRequestModel request, CancellationToken cancellationToken)
         {
             bool response = false;
-            if (Path.GetExtension(request.File.FileName).ToLowerInvariant() == "csv")
+            if (Path.GetExtension(request.File.FileName).ToLowerInvariant() == ".csv")
             {
                 //get shouldUploadFile value from database
                 //create sp 
@@ -37,10 +37,9 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
                 // ---then add/edit filename to TaskDataFile table with all detail and return true
                 // -else
                 //---return false
-                var shouldUploadFile = true;
-                response = shouldUploadFile;
+                response = await _taskMetadataPersistence.UploadTaskFile(request.TaskId, (int)request.FileType, request.File.FileName);
 
-                if (shouldUploadFile)
+                if (response)
                 {
                     var pathToSaveFile = Path.Combine(
                         _hostingEnvironment.ContentRootPath,

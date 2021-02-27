@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using SqlServerGraphDb.CommandQueryHandler.ResponseModels.CommandResponseModels;
-using static SqlServerGraphDb.CommandQueryHandler.Enums.Enums;
+using static SqlServerGraphDb.Persistence.Enums.Enums;
 
 namespace SqlServerGraphDb.CommandQueryHandler.RequestModels.CommandRequestModels
 {

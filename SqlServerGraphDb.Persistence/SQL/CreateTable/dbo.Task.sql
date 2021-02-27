@@ -1,7 +1,7 @@
 USE [GraphDBDemo]
 GO
 
-/****** Object:  Table [dbo].[Task]    Script Date: 25-02-2021 8.24.25 PM ******/
+/****** Object:  Table [dbo].[Task]    Script Date: 27-02-2021 10.28.27 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -21,4 +21,5 @@ GO
 
 ALTER TABLE [dbo].[Task] ADD  CONSTRAINT [DF_Task_CreatedOn]  DEFAULT (getdate()) FOR [CreatedOn]
 GO
+
 
