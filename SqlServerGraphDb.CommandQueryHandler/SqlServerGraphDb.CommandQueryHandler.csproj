@@ -9,12 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Handlers\QueryHandlers\" />
-    <Folder Include="RequestModels\QueryRequestModels\" />
-    <Folder Include="ResponseModels\QueryResponseModels\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.3" />
   </ItemGroup>

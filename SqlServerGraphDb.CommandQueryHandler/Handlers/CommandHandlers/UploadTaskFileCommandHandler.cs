@@ -31,12 +31,6 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
             bool response = false;
             if (Path.GetExtension(request.File.FileName).ToLowerInvariant() == ".csv")
             {
-                //get shouldUploadFile value from database
-                //create sp 
-                // -if taskId is valid
-                // ---then add/edit filename to TaskDataFile table with all detail and return true
-                // -else
-                //---return false
                 response = await _taskMetadataPersistence.UploadTaskFile(request.TaskId, (int)request.FileType, request.File.FileName);
 
                 if (response)

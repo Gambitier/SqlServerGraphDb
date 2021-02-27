@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SqlServerGraphDb.CommandQueryHandler.RequestModels.CommandRequestModels;
+using SqlServerGraphDb.CommandQueryHandler.RequestModels.QueryRequestModels;
 using System;
 using System.Threading.Tasks;
 
@@ -43,11 +44,12 @@ namespace SqlServerGraphDb.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllTaskDetails([FromQuery] string taskId)
+        public async Task<IActionResult> GetTaskDetailsAsync([FromQuery] TaskDetailsRequestModel requestModel)
         {
             // return data from TaskAndFiles table
             // group data with Task.Id
-            throw new NotImplementedException();
+            var response = await _mediator.Send(requestModel).ConfigureAwait(false);
+            return Ok(response);
         }
 
         [HttpPost]

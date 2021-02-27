@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using SqlServerGraphDb.Persistence.Constants;
+using SqlServerGraphDb.Persistence.DataModels;
 using SqlServerGraphDb.Persistence.Factory;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using static SqlServerGraphDb.Persistence.Enums.Enums;
@@ -16,6 +18,16 @@ namespace SqlServerGraphDb.Persistence.Persistence
             _connectionFactory = connectionFactory;
         }
 
+        public async Task<IEnumerable<TaskMetadata>> GetTaskMetadataByTaskId(int taskId)
+        {
+            var connection = _connectionFactory.GetDatabaseConnection();
+            string query = StoredProcedureConstants.spTaskMetadata_GetAllByTaskId;
+            var response = await connection
+                .QueryAsync<TaskMetadata>(query, new { TaskId = taskId }, null, null, CommandType.StoredProcedure);
+
+            return response;
+        }
+
         public async Task<bool> UploadTaskFile(int taskId, int fileType, string fileName)
         {
             var connection = _connectionFactory.GetDatabaseConnection();
@@ -28,7 +40,7 @@ namespace SqlServerGraphDb.Persistence.Persistence
             param.Add("FileProcessingStatus", (int)FileProcessingStatus.Uploaded);
             param.Add("NewRecordInserted", dbType: DbType.Boolean, direction: ParameterDirection.Output);
 
-            await connection.ExecuteScalarAsync<bool>(query, param, null, null, CommandType.StoredProcedure);
+            await connection.ExecuteAsync(query, param, null, null, CommandType.StoredProcedure);
             var NewRecordInserted = param.Get<bool>("NewRecordInserted");
             return NewRecordInserted;
         }
