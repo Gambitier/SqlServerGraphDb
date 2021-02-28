@@ -53,7 +53,7 @@ namespace SqlServerGraphDb.Controllers
         }
 
         [HttpPost]
-        public IActionResult ExecuteTask([FromQuery] string taskId)
+        public async Task<IActionResult> ExecuteTaskAsync([FromQuery] ExecuteTaskRequestModel requestModel)
         {
             // Responsible for 
             // - reading all files uploaded for task
@@ -64,7 +64,8 @@ namespace SqlServerGraphDb.Controllers
             // - - -> add Node and NodeTypeEnum
             // - - -> add Edge according to Relation file
             // - - -> add EdgeId and RelationEnum to normal relational db table according to Relation file
-            throw new NotImplementedException();
+            var response = await _mediator.Send(requestModel).ConfigureAwait(false);
+            return Ok(response);
         }
     }
 }
