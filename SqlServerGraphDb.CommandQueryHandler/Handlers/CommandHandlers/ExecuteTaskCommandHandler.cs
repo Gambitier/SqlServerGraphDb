@@ -49,13 +49,20 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
 
             foreach(var metadata in taskMetadata)
             {
-                string tableName;
-                IEnumerable<GraphNode> graphNodes;
-                ReadCsvFile(fileDirectory, metadata, out tableName, out graphNodes);
+                if (metadata.FileType == (int)FileType.Job
+                    || metadata.FileType == (int)FileType.Operation
+                    || metadata.FileType == (int)FileType.Project)
+                {
+                    ReadCsvFile(fileDirectory, metadata, out string tableName, out IEnumerable<GraphNode> graphNodes);
 
-                DataTable table = CreateDataTable(graphNodes, request.TaskId);
+                    DataTable table = CreateDataTable(graphNodes, request.TaskId);
 
-                await AddDataToDb(tableName, table);
+                    await AddDataToDb(tableName, table);
+                }
+                else if (metadata.FileType == (int)FileType.Relation)
+                {
+
+                }
             }
 
 
