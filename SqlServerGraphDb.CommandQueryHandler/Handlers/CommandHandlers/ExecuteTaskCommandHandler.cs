@@ -53,7 +53,9 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
                     || metadata.FileType == (int)FileType.Operation
                     || metadata.FileType == (int)FileType.Project)
                 {
-                    ReadCsvFile(fileDirectory, metadata, out string tableName, out IEnumerable<GraphNode> graphNodes);
+                    string tableName;
+                    IEnumerable<GraphNode> graphNodes;
+                    ReadCsvFile(fileDirectory, metadata, out tableName, out graphNodes);
 
                     DataTable table = CreateDataTable(graphNodes, request.TaskId);
 
