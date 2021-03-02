@@ -1,9 +1,10 @@
-﻿using LINQtoCSV;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using SqlServerGraphDb.CommandQueryHandler.CSVReaderModels;
 using SqlServerGraphDb.CommandQueryHandler.RequestModels.CommandRequestModels;
 using SqlServerGraphDb.CommandQueryHandler.ResponseModels.CommandResponseModels;
+using SqlServerGraphDb.CommandQueryHandler.Utilities;
 using SqlServerGraphDb.Persistence.DataModels;
 using SqlServerGraphDb.Persistence.Factory;
 using SqlServerGraphDb.Persistence.Persistence;
@@ -11,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,45 +40,73 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
 
         public async Task<ExecuteTaskResponseModel> Handle(ExecuteTaskRequestModel request, CancellationToken cancellationToken)
         {
-            var taskMetadata = await _taskMetadataPersistence.GetTaskMetadataByTaskId(request.TaskId);
+            IEnumerable<TaskMetadata> taskMetadata = await _taskMetadataPersistence.GetTaskMetadataByTaskId(request.TaskId);
 
-            var fileDirectory = Path.Combine(
+            string fileDirectory = Path.Combine(
                 _hostingEnvironment.ContentRootPath,
                 _configuration["TaskUploadsFolderName"],
                 $"{request.TaskId}");
 
-            foreach(var metadata in taskMetadata)
+            foreach (TaskMetadata metadata in taskMetadata)
             {
+                FileType fileType = (FileType)metadata.FileType;
+                string filePath = Path.Combine(fileDirectory, metadata.FileName);
+
                 if (metadata.FileType == (int)FileType.Job
                     || metadata.FileType == (int)FileType.Operation
                     || metadata.FileType == (int)FileType.Project)
                 {
-                    string tableName;
-                    IEnumerable<GraphNode> graphNodes;
-                    ReadCsvFile(fileDirectory, metadata, out tableName, out graphNodes);
-
-                    DataTable table = CreateDataTable(graphNodes, request.TaskId);
-
-                    await AddDataToDb(tableName, table);
+                    IEnumerable<GraphNode> graphNodes = CSVReader.ReadCsvFile<GraphNode>(filePath);
+                    DataTable nodeDataTable = GetNodeDataTable(graphNodes, request.TaskId);
+                    await AddBulkData(fileType.ToString(), nodeDataTable);
                 }
                 else if (metadata.FileType == (int)FileType.Relation)
                 {
-
+                    IEnumerable<RelationCSVReaderModel> csvData = CSVReader.ReadCsvFile<RelationCSVReaderModel>(filePath);
+                    DataTable relationTable = GetRelationDataTable(csvData, request.TaskId);
+                    await AddBulkData(fileType.ToString(), relationTable);
                 }
             }
-
 
             return new ExecuteTaskResponseModel();
         }
 
-        private async Task AddDataToDb(string tableName, DataTable table)
+        private DataTable GetRelationDataTable(IEnumerable<RelationCSVReaderModel> csvData, int TaskId)
         {
-            using (var connection = _connectionFactory.GetDatabaseConnection())
+            DataTable table = new DataTable();
+            table.Columns.Add("TaskId", typeof(int));
+            table.Columns.Add("FromDataId", typeof(int));
+            table.Columns.Add("FromTableEnum", typeof(int));
+            table.Columns.Add("ToDataId", typeof(int));
+            table.Columns.Add("ToTableEnum", typeof(int));
+            table.Columns.Add("RelationEnum", typeof(int));
+
+            foreach (RelationCSVReaderModel item in csvData)
+            {
+                Tuple<FileType, int> originData = RelationEdgeDataMapper.ProcessNodeData(item.Origin);
+                Tuple<FileType, int> targetData = RelationEdgeDataMapper.ProcessNodeData(item.Target);
+                RelationType relationType = RelationEdgeDataMapper.ProcessRelationEdgeData(item.Relation);
+
+                table.Rows.Add(new object[] {
+                    TaskId,
+                    originData.Item2,
+                    (int)originData.Item1,
+                    targetData.Item2,
+                    (int)targetData.Item1,
+                });
+            }
+
+            return table;
+        }
+
+        private async Task AddBulkData(string tableName, DataTable table)
+        {
+            using (SqlConnection connection = _connectionFactory.GetDatabaseConnection())
             {
                 connection.Open();
-                using (var transaction = connection.BeginTransaction())
+                using (SqlTransaction transaction = connection.BeginTransaction())
                 {
-                    using (var sqlBulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+                    using (SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
                     {
                         try
                         {
@@ -99,9 +127,9 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
             }
         }
 
-        private static DataTable CreateDataTable(IEnumerable<GraphNode> graphNodes, int TaskId)
+        private static DataTable GetNodeDataTable(IEnumerable<GraphNode> graphNodes, int TaskId)
         {
-            var table = new DataTable();
+            DataTable table = new DataTable();
             table.Columns.Add("DataId", typeof(int));
             table.Columns.Add("TaskId", typeof(int));
             table.Columns.Add("Title", typeof(string));
@@ -109,7 +137,7 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
             table.Columns.Add("Detail", typeof(string));
             table.Columns.Add("Summary", typeof(string));
 
-            foreach (var item in graphNodes)
+            foreach (GraphNode item in graphNodes)
             {
                 table.Rows.Add(new object[] {
                     item.DataId,
@@ -122,22 +150,6 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
             }
 
             return table;
-        }
-
-        private static void ReadCsvFile(string fileDirectory, TaskMetadata metadata, out string tableName, out IEnumerable<GraphNode> graphNodes)
-        {
-            var filePath = Path.Combine(fileDirectory, metadata.FileName);
-            var fileType = (FileType)metadata.FileType;
-            tableName = fileType.ToString();
-            CsvFileDescription csvFileDescription = new CsvFileDescription
-            {
-                SeparatorChar = ',',
-                FirstLineHasColumnNames = true
-            };
-
-            CsvContext csvContext = new CsvContext();
-            StreamReader streamReader = new StreamReader(filePath);
-            graphNodes = csvContext.Read<GraphNode>(streamReader, csvFileDescription);
         }
     }
 }

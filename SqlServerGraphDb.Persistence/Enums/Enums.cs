@@ -18,5 +18,11 @@ namespace SqlServerGraphDb.Persistence.Enums
             Success = 3, //once file processing is success, dont let user upload another file
             Inprogress = 4, //no modification allowed
         }
+
+        public enum RelationType
+        {
+            ParentChild = 1,
+            Attachment  = 2,
+        }
     }
 }
