@@ -93,6 +93,7 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
                     (int)originData.Item1,
                     targetData.Item2,
                     (int)targetData.Item1,
+                    (int)relationType
                 });
             }
 
