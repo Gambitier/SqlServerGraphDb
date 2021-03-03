@@ -107,7 +107,7 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
                 connection.Open();
                 using (SqlTransaction transaction = connection.BeginTransaction())
                 {
-                    using (SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+                    using (SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.FireTriggers, transaction))
                     {
                         try
                         {
