@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Content\Sample files for upload\" />
     <Folder Include="TaskUploads\" />
   </ItemGroup>
 
