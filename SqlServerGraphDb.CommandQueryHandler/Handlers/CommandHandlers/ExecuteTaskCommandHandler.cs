@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static SqlServerGraphDb.Persistence.Enums.Enums;
@@ -40,35 +41,47 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
 
         public async Task<ExecuteTaskResponseModel> Handle(ExecuteTaskRequestModel request, CancellationToken cancellationToken)
         {
+            ExecuteTaskResponseModel response = new ExecuteTaskResponseModel();
             IEnumerable<TaskMetadata> taskMetadata = await _taskMetadataPersistence.GetTaskMetadataByTaskId(request.TaskId);
-
-            string fileDirectory = Path.Combine(
+            if (taskMetadata != null)
+            {
+                string fileDirectory = Path.Combine(
                 _hostingEnvironment.ContentRootPath,
                 _configuration["TaskUploadsFolderName"],
                 $"{request.TaskId}");
 
-            foreach (TaskMetadata metadata in taskMetadata)
-            {
-                FileType fileType = (FileType)metadata.FileType;
-                string filePath = Path.Combine(fileDirectory, metadata.FileName);
+                foreach (TaskMetadata metadata in taskMetadata)
+                {
+                    FileType fileType = (FileType)metadata.FileType;
+                    string filePath = Path.Combine(fileDirectory, metadata.FileName);
 
-                if (metadata.FileType == (int)FileType.Job
-                    || metadata.FileType == (int)FileType.Operation
-                    || metadata.FileType == (int)FileType.Project)
-                {
-                    IEnumerable<GraphNode> graphNodes = CSVReader.ReadCsvFile<GraphNode>(filePath);
-                    DataTable nodeDataTable = GetNodeDataTable(graphNodes, request.TaskId);
-                    await AddBulkData(fileType.ToString(), nodeDataTable);
-                }
-                else if (metadata.FileType == (int)FileType.Relation)
-                {
-                    IEnumerable<RelationCSVReaderModel> csvData = CSVReader.ReadCsvFile<RelationCSVReaderModel>(filePath);
-                    DataTable relationTable = GetRelationDataTable(csvData, request.TaskId);
-                    await AddBulkData(fileType.ToString(), relationTable);
+                    if (metadata.FileType == (int)FileType.Job
+                        || metadata.FileType == (int)FileType.Operation
+                        || metadata.FileType == (int)FileType.Project)
+                    {
+                        IEnumerable<GraphNode> graphNodes = CSVReader.ReadCsvFile<GraphNode>(filePath);
+                        DataTable nodeDataTable = GetNodeDataTable(graphNodes, request.TaskId);
+
+                        // need to use dataInsertSuccess for returning response to api
+                        bool dataInsertSuccess = await AddBulkData(fileType.ToString(), nodeDataTable);
+                    }
+                    else if (metadata.FileType == (int)FileType.Relation)
+                    {
+                        IEnumerable<RelationCSVReaderModel> csvData = CSVReader.ReadCsvFile<RelationCSVReaderModel>(filePath);
+                        DataTable relationTable = GetRelationDataTable(csvData, request.TaskId);
+
+                        // need to use dataInsertSuccess for returning response to api
+                        bool dataInsertSuccess = await AddBulkData(fileType.ToString(), relationTable);
+                    }
                 }
             }
+            else
+            {
+                response.Success = false;
+                response.Message = "Please upload files first";
+            }
 
-            return new ExecuteTaskResponseModel();
+            return response;
         }
 
         private DataTable GetRelationDataTable(IEnumerable<RelationCSVReaderModel> csvData, int TaskId)
@@ -100,8 +113,9 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
             return table;
         }
 
-        private async Task AddBulkData(string tableName, DataTable table)
+        private async Task<bool> AddBulkData(string tableName, DataTable table)
         {
+            bool dataUploadedAndCommited = false;
             using (SqlConnection connection = _connectionFactory.GetDatabaseConnection())
             {
                 connection.Open();
@@ -117,6 +131,7 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
                             sqlBulkCopy.EnableStreaming = true;
                             await sqlBulkCopy.WriteToServerAsync(table);
                             transaction.Commit();
+                            dataUploadedAndCommited = true;
                         }
                         catch (Exception e)
                         {
@@ -126,6 +141,7 @@ namespace SqlServerGraphDb.CommandQueryHandler.Handlers.CommandHandlers
                     }
                 }
             }
+            return dataUploadedAndCommited;
         }
 
         private static DataTable GetNodeDataTable(IEnumerable<GraphNode> graphNodes, int TaskId)
