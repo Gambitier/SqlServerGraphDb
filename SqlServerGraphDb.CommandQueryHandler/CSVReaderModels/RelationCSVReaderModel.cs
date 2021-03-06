@@ -1,6 +1,4 @@
-﻿using static SqlServerGraphDb.Persistence.Enums.Enums;
-
-namespace SqlServerGraphDb.CommandQueryHandler.CSVReaderModels
+﻿namespace SqlServerGraphDb.CommandQueryHandler.CSVReaderModels
 {
     internal class RelationCSVReaderModel
     {

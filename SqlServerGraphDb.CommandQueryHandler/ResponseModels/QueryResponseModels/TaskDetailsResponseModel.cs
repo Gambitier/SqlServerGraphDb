@@ -1,7 +1,5 @@
 ﻿using SqlServerGraphDb.Persistence.DataModels;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SqlServerGraphDb.CommandQueryHandler.ResponseModels.QueryResponseModels
 {
